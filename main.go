@@ -45,7 +45,7 @@ func (d *Dispatcher) dispatch() {
 		select {
 		case job := <-d.jobQueue:
 			go func() {
-				fmt.Println("Adding job to workerJobQueue")
+				fmt.Printf("adding %s to workerJobQueue\n", job.Name)
 				workerJobQueue := <-d.workerPool
 				workerJobQueue <- job
 			}()
@@ -83,9 +83,9 @@ func (w Worker) start() {
 			select {
 			case job := <-w.jobQueue:
 				// Wait for dispatcher to add job to jobQueue
-				fmt.Printf("worker%d: Received new job, delaying for %f seconds\n", w.id, job.Delay.Seconds())
+				fmt.Printf("worker%d: started job %s, blocking for %f seconds\n", w.id, job.Name, job.Delay.Seconds())
 				time.Sleep(job.Delay)
-				fmt.Printf("worker%d: Hello, %s!\n", w.id, job.Name)
+				fmt.Printf("worker%d: completed %s!\n", w.id, job.Name)
 			case <-w.quitChan:
 				// We have been asked to stop
 				fmt.Printf("worker%d stopping\n", w.id)
@@ -117,29 +117,24 @@ func requestHandler(w http.ResponseWriter, r *http.Request, jobQueue chan Job) {
 		return
 	}
 
-	// Check to make sure the delay is anywhere from 1 to 10 seconds.
+	// Validate delay is in range 1 to 10 seconds.
 	if delay.Seconds() < 1 || delay.Seconds() > 10 {
 		http.Error(w, "The delay must be between 1 and 10 seconds, inclusively.", http.StatusBadRequest)
 		return
 	}
 
-	// Now, we retrieve the person's name from the request.
+	// Set name and validate value.
 	name := r.FormValue("name")
-
-	// Just do a quick bit of sanity checking to make sure the client actually provided us with a name.
 	if name == "" {
 		http.Error(w, "You must specify a name.", http.StatusBadRequest)
 		return
 	}
 
-	// Now, we take the delay, and the person's name, and make a Job out of them.
+	// Create Job and push the work onto the jobQueue.
 	job := Job{Name: name, Delay: delay}
-
-	// Push the work onto the queue.
 	jobQueue <- job
-	fmt.Println("Adding job to jobQueue")
 
-	// And let the user know their work request was created.
+	// Render success.
 	w.WriteHeader(http.StatusCreated)
 }
 
