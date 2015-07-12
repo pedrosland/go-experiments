@@ -7,9 +7,9 @@ http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
 
 I made a few adjustments to the code:
 
-* Using non-exported private methods
-* Removing the global variables
-* Bringing the flags closer to their usage in main()
+* Use non-exported private methods
+* Remove global variables
+* Bring the flags closer to their usage in main()
 
 ## Usage
 
