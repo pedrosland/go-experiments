@@ -1,0 +1,22 @@
+# Processing Job's in Golang
+
+A running example of the code from:
+
+http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang
+http://nesv.github.io/golang/2014/02/25/worker-queues-in-go.html
+
+I made a few adjustments to the code:
+
+* Using private methods where possible
+* Removing the global queue variables
+* Bringing the flags closer to their usage in main
+
+## Usage
+
+Run the application:
+
+```
+go run main.go -max_workers 5
+```
+
+Use flags to adjust the `max_workers` and `max_queue_size` when running the program.
