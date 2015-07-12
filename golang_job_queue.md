@@ -27,6 +27,6 @@ Curl from another terminal window:
 for i in {1..15}; do curl localhost:5000/work -d name=$USER$i -d delay=$(expr $i % 5)s; done
 ```
 
-## Worker Only Queue
+## Remove Dispatcher
 
 A simplified example that skips the dispatcher and creates workers directly. See `main_worker_only.go` the performance characteristics seem to remain the same.
