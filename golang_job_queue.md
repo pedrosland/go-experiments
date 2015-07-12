@@ -10,7 +10,6 @@ I made a few adjustments to the code:
 * Use non-exported private methods
 * Remove global variables
 * Bring the flags closer to their usage in main()
-* Give workers an ID they can log with
 
 ## Usage
 
