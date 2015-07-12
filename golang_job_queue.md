@@ -1,4 +1,4 @@
-# Processing Job's in Golang
+# Job queues in Golang
 
 A running example of the code from:
 
@@ -16,7 +16,7 @@ I made a few adjustments to the code:
 Run the application:
 
 ```
-go run main.go -max_workers 5
+PORT=5000 go run main.go -max_workers 5
 ```
 
 Use flags to adjust the `max_workers` and `max_queue_size` when running the program.
