@@ -83,8 +83,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request, jobQueue chan Job) {
 
   // Create Job and push the work onto the jobQueue.
   job := Job{Name: name, Delay: delay}
-  jobQueue <- job
-
+  go func() {
+    jobQueue <- job
+  }()
+  
   // Render success.
   w.WriteHeader(http.StatusCreated)
 }
