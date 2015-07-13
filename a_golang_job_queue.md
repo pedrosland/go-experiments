@@ -1,4 +1,4 @@
-# Job queues in Golang
+# Golang Job Queue
 
 A running example of the code from:
 
@@ -21,6 +21,6 @@ Curl from another terminal window:
 
     $ for i in {1..15}; do curl localhost:5001/work -d name=$USER$i -d delay=$(expr $i % 9 + 1)s; done
 
-Remove Dispatcher
+## Remove Dispatcher
 
-A simplified example that skips the dispatcher and creates workers directly. See main_worker_only.go the performance characteristics seem to remain the same.
+A simplified example that skips the dispatcher and creates workers directly. See `example_worker_only.go` for code. The performance characteristics seem to remain the same.
