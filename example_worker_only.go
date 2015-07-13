@@ -1,5 +1,3 @@
-// Removed dispatcher and create workers directly in main()
-
 package main
 
 import (
@@ -8,6 +6,8 @@ import (
   "net/http"
   "os"
   "time"
+  _ "expvar"
+  _ "net/http/pprof"
 )
 
 // Job holds the attributes needed to perform unit of work.
@@ -36,20 +36,12 @@ func (w Worker) start() {
     for {
       select {
       case job := <-w.jobQueue:
+        // Dispatcher has added a job to my jobQueue.
         fmt.Printf("worker%d: started %s, blocking for %f seconds\n", w.id, job.Name, job.Delay.Seconds())
         time.Sleep(job.Delay)
         fmt.Printf("worker%d: completed %s!\n", w.id, job.Name)
-      case <-w.quitChan:
-        fmt.Printf("worker%d stopping\n", w.id)
-        return
       }
     }
-  }()
-}
-
-func (w Worker) stop() {
-  go func() {
-    w.quitChan <- true
   }()
 }
 
@@ -86,9 +78,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request, jobQueue chan Job) {
   go func() {
     jobQueue <- job
   }()
-  
+
   // Render success.
   w.WriteHeader(http.StatusCreated)
+  return
 }
 
 func main() {
