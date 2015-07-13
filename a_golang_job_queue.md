@@ -11,7 +11,7 @@ Remove global variables
 Bring the flags closer to their usage in main()
 Usage
 
-## Run the application
+## Run the Application
 
     $ PORT=5000 go run example_dispatcher.go -max_workers 5
 
@@ -21,7 +21,7 @@ Curl from another terminal window:
 
     $ for i in {1..15}; do curl localhost:5001/work -d name=$USER$i -d delay=$(expr $i % 9 + 1)s; done
 
-## Remove Dispatcher
+## Remove the Dispatcher
 
 A simplified example that skips the dispatcher and creates workers directly. See `example_worker_only.go` for code.
 
