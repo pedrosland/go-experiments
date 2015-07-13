@@ -11,7 +11,7 @@ Remove global variables
 Bring the flags closer to their usage in main()
 Usage
 
-## Run the application:
+## Run the application
 
     $ PORT=5000 go run example_dispatcher.go -max_workers 5
 
@@ -23,4 +23,8 @@ Curl from another terminal window:
 
 ## Remove Dispatcher
 
-A simplified example that skips the dispatcher and creates workers directly. See `example_worker_only.go` for code. The performance characteristics seem to remain the same.
+A simplified example that skips the dispatcher and creates workers directly. See `example_worker_only.go` for code.
+
+## Performance
+
+From what I can tell using Pprof the performance characteristics seem to remain the same between both examples.
