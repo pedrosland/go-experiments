@@ -138,8 +138,9 @@ func requestHandler(w http.ResponseWriter, r *http.Request, jobQueue chan Job) {
 
 func main() {
   var (
-    maxWorkers = flag.Int("max_workers", 5, "The number of workers to start")
+    maxWorkers   = flag.Int("max_workers", 5, "The number of workers to start")
     maxQueueSize = flag.Int("max_queue_size", 100, "The size of job queue")
+    port         = flag.String("port", "8080", "The server port")
   )
   flag.Parse()
 
@@ -154,5 +155,5 @@ func main() {
   http.HandleFunc("/work", func(w http.ResponseWriter, r *http.Request) {
     requestHandler(w, r, jobQueue)
   })
-  http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+  log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
