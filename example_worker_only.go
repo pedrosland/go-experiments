@@ -85,6 +85,7 @@ func requestHandler(jobQueue chan Job, w http.ResponseWriter, r *http.Request) {
 	// Create Job and push the work onto the jobQueue.
 	job := Job{Name: name, Delay: delay}
 	go func() {
+		fmt.Printf("added: %s %s\n", job.Name, job.Delay)
 		jobQueue <- job
 	}()
 

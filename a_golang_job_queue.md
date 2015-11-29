@@ -34,6 +34,6 @@ Use flags to adjust the `max_workers` and `max_queue_size` to override the defau
 
 cURL from another terminal window:
 
-    $ for i in {1..15}; do curl localhost:8080/work -d name=$USER$i -d delay=$(expr $i % 9 + 1)s; done
+    $ for i in {1..15}; do curl localhost:8080/work -d name=job$i -d delay=$(expr $i % 9 + 1)s; done
 
 
