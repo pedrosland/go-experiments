@@ -6,10 +6,10 @@ http://marcio.io/2015/07/handling-1-million-requests-per-minute-with-golang http
 
 I made a few adjustments to the code:
 
-Use non-exported private methods
-Remove global variables
-Bring the flags closer to their usage in main()
-Usage
+* Use non-exported private methods
+* Remove global variables
+* Bring the flags closer to their usage in main()
+* Usage
 
 ## Run the Application
 
