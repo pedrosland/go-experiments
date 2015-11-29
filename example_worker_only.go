@@ -1,3 +1,4 @@
+// Refactored code with Dispatcher removed
 package main
 
 import (
