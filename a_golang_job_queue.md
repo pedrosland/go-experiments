@@ -22,7 +22,7 @@ Simplify the worker queue by removing the `Dispatcher`.
 
 https://gist.github.com/harlow/dbcd639cf8d396a2ab73#file-example_worker_only-go
 
-## Performance
+### Performance
 
 The test run with Pprof show performance characteristics remain the same between both examples.
 
@@ -35,5 +35,3 @@ Use flags to adjust the `max_workers` and `max_queue_size` to override the defau
 cURL from another terminal window:
 
     $ for i in {1..15}; do curl localhost:8080/work -d name=job$i -d delay=$(expr $i % 9 + 1)s; done
-
-
