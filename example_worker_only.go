@@ -1,4 +1,3 @@
-// Refactored code with Dispatcher removed
 package main
 
 import (
@@ -105,7 +104,7 @@ func main() {
 	// Create the job queue.
 	jobQueue := make(chan Job, *maxQueueSize)
 
-	// Create new workers and add to queue
+	// Create new workers with access to jobQueue
 	for i := 0; i < *maxWorkers; i++ {
 		worker := newWorker(i, jobQueue)
 		worker.start()
