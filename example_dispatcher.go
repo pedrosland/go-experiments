@@ -137,9 +137,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request, jobQueue chan Job) {
 }
 
 func main() {
-  // Parse the command-line flags.
-  maxWorkers := flag.Int("max_workers", 5, "The number of workers to start")
-  maxQueueSize := flag.Int("max_queue_size", 100, "The size of job queue")
+  var (
+    maxWorkers = flag.Int("max_workers", 5, "The number of workers to start")
+    maxQueueSize = flag.Int("max_queue_size", 100, "The size of job queue")
+  )
   flag.Parse()
 
   // Create the job queue.
