@@ -15,7 +15,7 @@ I made a few adjustments to the code:
 
     $ PORT=5000 go run example_dispatcher.go -max_workers 5
 
-Use flags to adjust the max_workers and max_queue_size to override the default values.
+Use flags to adjust the `max_workers` and `max_queue_size` to override the default values.
 
 Curl from another terminal window:
 
