@@ -15,35 +15,13 @@ type job struct {
 	duration time.Duration
 }
 
-func newWorker(id int) *worker {
-	return &worker{
-		id:       id,
-		quitChan: make(chan bool),
-	}
-}
-
 type worker struct {
-	id       int
-	quitChan chan bool
+	id int
 }
 
-func (w worker) process(jobCh chan job) {
-	for {
-		select {
-		case j := <-jobCh:
-			fmt.Printf("worker %d: started %s, duration: %f seconds\n", w.id, j.name, j.duration.Seconds())
-			time.Sleep(j.duration)
-		case <-w.quitChan:
-			fmt.Printf("worker %d: stopped\n", w.id)
-			return
-		}
-	}
-}
-
-func (w worker) stop() {
-	go func() {
-		w.quitChan <- true
-	}()
+func (w worker) process(j job) {
+	fmt.Printf("worker %d: started %s, duration: %f seconds\n", w.id, j.name, j.duration.Seconds())
+	time.Sleep(j.duration)
 }
 
 func requestHandler(jobCh chan job, w http.ResponseWriter, r *http.Request) {
@@ -99,8 +77,12 @@ func main() {
 
 	// create workers
 	for i := 0; i < *maxWorkers; i++ {
-		worker := newWorker(i)
-		go worker.process(jobCh)
+		w := worker{i}
+		go func(w worker) {
+			for j := range jobCh {
+				w.process(j)
+			}
+		}(w)
 	}
 
 	// handler for adding jobs
