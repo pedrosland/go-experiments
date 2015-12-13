@@ -12,11 +12,10 @@ Small refactorings made to original code:
 * Use non-exported private methods
 * Remove global variables
 * Bring the flags closer to their usage in main()
-* Usage
 
 ### Step 2
 
-Simplify the worker queue by removing the `Dispatcher`. 
+Simplify the worker queue by removing the `Dispatcher`.
 
 * Creates workers directly and passes job queue to them
 

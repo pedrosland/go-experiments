@@ -10,42 +10,34 @@ import (
 	"time"
 )
 
-// Job holds the attributes needed to perform unit of work.
-type Job struct {
-	Name  string
-	Delay time.Duration
+type job struct {
+	name     string
+	duration time.Duration
 }
 
-func newWorker(id int, jobQueue chan Job) worker {
-	return worker{
+func newWorker(id int) *worker {
+	return &worker{
 		id:       id,
-		jobQueue: jobQueue,
 		quitChan: make(chan bool),
 	}
 }
 
 type worker struct {
 	id       int
-	jobQueue chan Job
 	quitChan chan bool
 }
 
-func (w worker) start() {
-	go func() {
-		for {
-			select {
-			case job := <-w.jobQueue:
-				// Dispatcher has added a job to my jobQueue.
-				fmt.Printf("worker%d: started %s, blocking for %f seconds\n", w.id, job.Name, job.Delay.Seconds())
-				time.Sleep(job.Delay)
-				fmt.Printf("worker%d: completed %s!\n", w.id, job.Name)
-			case <-w.quitChan:
-				// We have been asked to stop.
-				fmt.Printf("worker%d stopping\n", w.id)
-				return
-			}
+func (w worker) process(jobCh chan job) {
+	for {
+		select {
+		case j := <-jobCh:
+			fmt.Printf("worker %d: started %s, duration: %f seconds\n", w.id, j.name, j.duration.Seconds())
+			time.Sleep(j.duration)
+		case <-w.quitChan:
+			fmt.Printf("worker %d: stopped\n", w.id)
+			return
 		}
-	}()
+	}
 }
 
 func (w worker) stop() {
@@ -54,7 +46,7 @@ func (w worker) stop() {
 	}()
 }
 
-func requestHandler(jobQueue chan Job, w http.ResponseWriter, r *http.Request) {
+func requestHandler(jobCh chan job, w http.ResponseWriter, r *http.Request) {
 	// Make sure we can only be called with an HTTP POST request.
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
@@ -62,15 +54,15 @@ func requestHandler(jobQueue chan Job, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse the delay.
-	delay, err := time.ParseDuration(r.FormValue("delay"))
+	// Parse the durations.
+	duration, err := time.ParseDuration(r.FormValue("delay"))
 	if err != nil {
 		http.Error(w, "Bad delay value: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Validate delay is in range 1 to 10 seconds.
-	if delay.Seconds() < 1 || delay.Seconds() > 10 {
+	if duration.Seconds() < 1 || duration.Seconds() > 10 {
 		http.Error(w, "The delay must be between 1 and 10 seconds, inclusively.", http.StatusBadRequest)
 		return
 	}
@@ -82,11 +74,11 @@ func requestHandler(jobQueue chan Job, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create Job and push the work onto the jobQueue.
-	job := Job{Name: name, Delay: delay}
+	// Create Job and push the work onto the jobCh.
+	job := job{name, duration}
 	go func() {
-		fmt.Printf("added: %s %s\n", job.Name, job.Delay)
-		jobQueue <- job
+		fmt.Printf("added: %s %s\n", job.name, job.duration)
+		jobCh <- job
 	}()
 
 	// Render success.
@@ -102,18 +94,18 @@ func main() {
 	)
 	flag.Parse()
 
-	// Create the job queue.
-	jobQueue := make(chan Job, *maxQueueSize)
+	// create job channel
+	jobCh := make(chan job, *maxQueueSize)
 
-	// Create new workers with access to jobQueue
+	// create workers
 	for i := 0; i < *maxWorkers; i++ {
-		worker := newWorker(i, jobQueue)
-		worker.start()
+		worker := newWorker(i)
+		go worker.process(jobCh)
 	}
 
-	// Start the HTTP handler.
+	// handler for adding jobs
 	http.HandleFunc("/work", func(w http.ResponseWriter, r *http.Request) {
-		requestHandler(jobQueue, w, r)
+		requestHandler(jobCh, w, r)
 	})
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
 }
