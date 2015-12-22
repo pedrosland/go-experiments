@@ -27,10 +27,10 @@ The test run with Pprof show performance characteristics remain the same between
 
 ## Run the Application
 
+Boot either the `worker_original.go` or the `worker_refactored.go` applications. Use flags to adjust the `max_workers` and `max_queue_size` to override the default values.
+
     $ go run worker_original.go -max_workers 5
 
-Use flags to adjust the `max_workers` and `max_queue_size` to override the default values.
-
-cURL from another terminal window:
+cURL the application from another terminal window:
 
     $ for i in {1..15}; do curl localhost:8080/work -d name=job$i -d delay=$(expr $i % 9 + 1)s; done
