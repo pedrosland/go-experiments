@@ -19,7 +19,7 @@ Simplify the worker queue by removing the `Dispatcher`.
 
 * Creates workers directly and passes job queue to them
 
-https://gist.github.com/harlow/dbcd639cf8d396a2ab73#file-example_worker_only-go
+https://gist.github.com/harlow/dbcd639cf8d396a2ab73#file-worker_refactored-go
 
 ### Performance
 
@@ -27,7 +27,7 @@ The test run with Pprof show performance characteristics remain the same between
 
 ## Run the Application
 
-    $ go run example_dispatcher.go -max_workers 5
+    $ go run worker_original.go -max_workers 5
 
 Use flags to adjust the `max_workers` and `max_queue_size` to override the default values.
 

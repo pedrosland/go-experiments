@@ -20,8 +20,9 @@ type worker struct {
 }
 
 func (w worker) process(j job) {
-	fmt.Printf("worker %d: started %s, duration: %f seconds\n", w.id, j.name, j.duration.Seconds())
+	fmt.Printf("worker%d: started %s, working for %f seconds\n", w.id, j.name, j.duration.Seconds())
 	time.Sleep(j.duration)
+	fmt.Printf("worker%d: completed %s!\n", w.id, j.name)
 }
 
 func requestHandler(jobCh chan job, w http.ResponseWriter, r *http.Request) {
