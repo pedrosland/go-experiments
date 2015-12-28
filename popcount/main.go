@@ -28,6 +28,12 @@ func PopCount(x uint64) int {
 		pc[byte(x>>(7*8))])
 }
 
+//
+// END COPYRIGHT
+//
+// --------------------------------------------------------------------
+//
+
 // PopCountLoop returns the population count (number of set bits) of x.
 func PopCountLoop(x uint64) (count int) {
 	for i := 0; i < 8; i++ {
@@ -36,7 +42,7 @@ func PopCountLoop(x uint64) (count int) {
 	return
 }
 
-// PopCountLoop returns the population count (number of set bits) of x.
+// PopCountBitShift returns the population count (number of set bits) of x.
 func PopCountBitShift(x uint64) (count int) {
 	for i := 0; i < 64; i++ {
 		count += int(x & 0x1)
@@ -45,7 +51,7 @@ func PopCountBitShift(x uint64) (count int) {
 	return
 }
 
-// PopCountLoop returns the population count (number of set bits) of x.
+// PopCountSubtract returns the population count (number of set bits) of x.
 func PopCountSubtract(x uint64) (count int) {
 	for x > 0 {
 		x = x & (x - 1)
@@ -53,5 +59,3 @@ func PopCountSubtract(x uint64) (count int) {
 	}
 	return
 }
-
-//!-

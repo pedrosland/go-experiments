@@ -17,33 +17,50 @@ var table = []struct {
 }
 
 func TestPopCount(t *testing.T) {
-	for i, test := range table {
-		if result := popcount.PopCount(test.binary); result != test.expected {
-			t.Errorf("test %d (%d) failed: expected %d got %d", i, test.binary, test.expected, result)
-		}
-	}
+	runTest(popcount.PopCount, t)
 }
 
 func TestPopCountLoop(t *testing.T) {
-	for i, test := range table {
-		if result := popcount.PopCountLoop(test.binary); result != test.expected {
-			t.Errorf("test %d (%d) failed: expected %d got %d", i, test.binary, test.expected, result)
-		}
-	}
+	runTest(popcount.PopCountLoop, t)
 }
 
 func TestPopCountBitShift(t *testing.T) {
+	runTest(popcount.PopCountBitShift, t)
+}
+
+func TestPopCountSubtract(t *testing.T) {
+	runTest(popcount.PopCountSubtract, t)
+}
+
+func runTest(fn func(uint64) int, t *testing.T) {
 	for i, test := range table {
-		if result := popcount.PopCountBitShift(test.binary); result != test.expected {
+		if result := fn(test.binary); result != test.expected {
 			t.Errorf("test %d (%d) failed: expected %d got %d", i, test.binary, test.expected, result)
 		}
 	}
 }
 
-func TestPopCountSubtract(t *testing.T) {
-	for i, test := range table {
-		if result := popcount.PopCountSubtract(test.binary); result != test.expected {
-			t.Errorf("test %d (%d) failed: expected %d got %d", i, test.binary, test.expected, result)
+func BenchmarkPopCount(b *testing.B) {
+	runBench(popcount.PopCount, b)
+}
+
+func BenchmarkPopCountLoop(b *testing.B) {
+	runBench(popcount.PopCount, b)
+}
+
+func BenchmarkPopCountBitShift(b *testing.B) {
+	runBench(popcount.PopCountBitShift, b)
+}
+
+func BenchmarkPopCountSubtract(b *testing.B) {
+	runBench(popcount.PopCountSubtract, b)
+}
+
+func runBench(fn func(uint64) int, b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, test := range table {
+			// Assume results are correct
+			fn(test.binary)
 		}
 	}
 }
