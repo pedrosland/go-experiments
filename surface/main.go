@@ -9,46 +9,66 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"os"
 )
 
 const (
-	width, height = 600, 320            // canvas size in pixels
-	cells         = 100                 // number of grid cells
-	xyrange       = 30.0                // axis ranges (-xyrange..+xyrange)
-	xyscale       = width / 2 / xyrange // pixels per x or y unit
-	zscale        = height * 0.4        // pixels per z unit
-	angle         = math.Pi / 6         // angle of x, y axes (=30°)
+	cells   = 100         // number of grid cells
+	xyrange = 30.0        // axis ranges (-xyrange..+xyrange)
+	angle   = math.Pi / 6 // angle of x, y axes (=30°)
 )
+
+type imageInfo struct {
+	width   float64
+	height  float64
+	xyscale float64 // pixels per x or y unit
+	zscale  float64 // pixels per z unit
+}
 
 var sin30, cos30 = math.Sin(angle), math.Cos(angle) // sin(30°), cos(30°)
 
 func main() {
-	fmt.Printf("<svg xmlns='http://www.w3.org/2000/svg' "+
+	createSvg(os.Stdout, newImageInfo(600, 320))
+}
+
+func newImageInfo(width, height float64) imageInfo {
+	return imageInfo{
+		width:   width,
+		height:  height,
+		xyscale: width / 2 / xyrange, // pixels per x or y unit
+		zscale:  height * 0.4,        // pixels per z unit
+	}
+}
+
+func createSvg(w io.Writer, info imageInfo) {
+	fmt.Fprintf(w, "<svg xmlns='http://www.w3.org/2000/svg' "+
 		"style='stroke: grey; stroke-width: 0.7' "+
-		"width='%d' height='%d'>", width, height)
+		"width='%d' height='%d'>", int(info.width), int(info.height))
+
 	for i := 0; i < cells; i++ {
 		for j := 0; j < cells; j++ {
-			ax, ay, z1, ok1 := corner(i+1, j)
-			bx, by, z2, ok2 := corner(i, j)
-			cx, cy, z3, ok3 := corner(i, j+1)
-			dx, dy, z4, ok4 := corner(i+1, j+1)
+			ax, ay, z1, ok1 := corner(i+1, j, info)
+			bx, by, z2, ok2 := corner(i, j, info)
+			cx, cy, z3, ok3 := corner(i, j+1, info)
+			dx, dy, z4, ok4 := corner(i+1, j+1, info)
 
 			if !ok1 || !ok2 || !ok3 || !ok4 {
 				continue
 			}
 
-			color := calculateColor(average(z1, z2, z3, z4))
+			color := calculateColor(average(z1, z2, z3, z4), info)
 
-			fmt.Printf("<polygon points='%g,%g %g,%g %g,%g %g,%g' fill='%s'/>\n",
+			fmt.Fprintf(w, "<polygon points='%g,%g %g,%g %g,%g %g,%g' fill='%s'/>\n",
 				ax, ay, bx, by, cx, cy, dx, dy, color)
 		}
 	}
-	fmt.Println("</svg>")
+
+	fmt.Fprintln(w, "</svg>")
 }
 
-func corner(i, j int) (float64, float64, float64, bool) {
+func corner(i, j int, info imageInfo) (float64, float64, float64, bool) {
 	// Find point (x,y) at corner of cell (i,j).
 	x := xyrange * (float64(i)/cells - 0.5)
 	y := xyrange * (float64(j)/cells - 0.5)
@@ -60,8 +80,8 @@ func corner(i, j int) (float64, float64, float64, bool) {
 	}
 
 	// Project (x,y,z) isometrically onto 2-D SVG canvas (sx,sy).
-	sx := width/2 + (x-y)*cos30*xyscale
-	sy := height/2 + (x+y)*sin30*xyscale - z*zscale
+	sx := info.width/2 + (x-y)*cos30*info.xyscale
+	sy := info.height/2 + (x+y)*sin30*info.xyscale - z*info.zscale
 	return sx, sy, z, true
 }
 
@@ -81,7 +101,7 @@ func average(nums ...float64) float64 {
 	return total / float64(i+1)
 }
 
-func calculateColor(z float64) string {
+func calculateColor(z float64, info imageInfo) string {
 	// z has range of -0.22 - 0.99
 	const minColor = 0xff0000
 	const maxColor = 0x0000ff
@@ -92,8 +112,6 @@ func calculateColor(z float64) string {
 	colorR := bitColor
 	colorB := 0xff - bitColor
 	hexColor := fmt.Sprintf("#%02x00%02x", colorR, colorB)
-
-	fmt.Fprintf(os.Stderr, "%v #%06x %s\n", bitColor, (colorR<<16)|colorB, hexColor)
 
 	return hexColor
 }
