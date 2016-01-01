@@ -10,8 +10,10 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"math"
-	"os"
+	"net/http"
+	"strconv"
 )
 
 const (
@@ -30,7 +32,27 @@ type imageInfo struct {
 var sin30, cos30 = math.Sin(angle), math.Cos(angle) // sin(30°), cos(30°)
 
 func main() {
-	createSvg(os.Stdout, newImageInfo(600, 320))
+	//createSvg(os.Stdout, newImageInfo(600, 320))
+
+	http.HandleFunc("/image.svg", handleImageRequest)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handleImageRequest(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+
+	width, err := strconv.ParseFloat(query.Get("width"), 64)
+	if err != nil {
+		width = 600
+	}
+
+	height, err := strconv.ParseFloat(query.Get("height"), 64)
+	if err != nil {
+		height = 320
+	}
+
+	w.Header().Set("Content-Type", "image/svg+xml")
+	createSvg(w, newImageInfo(width, height))
 }
 
 func newImageInfo(width, height float64) imageInfo {
