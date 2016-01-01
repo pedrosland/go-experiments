@@ -30,14 +30,16 @@ func main() {
 		"width='%d' height='%d'>", width, height)
 	for i := 0; i < cells; i++ {
 		for j := 0; j < cells; j++ {
-			ax, ay, color, ok1 := corner(i+1, j)
-			bx, by, _, ok2 := corner(i, j)
-			cx, cy, _, ok3 := corner(i, j+1)
-			dx, dy, _, ok4 := corner(i+1, j+1)
+			ax, ay, z1, ok1 := corner(i+1, j)
+			bx, by, z2, ok2 := corner(i, j)
+			cx, cy, z3, ok3 := corner(i, j+1)
+			dx, dy, z4, ok4 := corner(i+1, j+1)
 
 			if !ok1 || !ok2 || !ok3 || !ok4 {
 				continue
 			}
+
+			color := calculateColor(average(z1, z2, z3, z4))
 
 			fmt.Printf("<polygon points='%g,%g %g,%g %g,%g %g,%g' fill='%s'/>\n",
 				ax, ay, bx, by, cx, cy, dx, dy, color)
@@ -46,7 +48,7 @@ func main() {
 	fmt.Println("</svg>")
 }
 
-func corner(i, j int) (float64, float64, string, bool) {
+func corner(i, j int) (float64, float64, float64, bool) {
 	// Find point (x,y) at corner of cell (i,j).
 	x := xyrange * (float64(i)/cells - 0.5)
 	y := xyrange * (float64(j)/cells - 0.5)
@@ -54,9 +56,32 @@ func corner(i, j int) (float64, float64, string, bool) {
 	// Compute surface height z.
 	z := f(x, y)
 	if math.IsNaN(z) {
-		return 0, 0, "", false
+		return 0, 0, 0, false
 	}
 
+	// Project (x,y,z) isometrically onto 2-D SVG canvas (sx,sy).
+	sx := width/2 + (x-y)*cos30*xyscale
+	sy := height/2 + (x+y)*sin30*xyscale - z*zscale
+	return sx, sy, z, true
+}
+
+func f(x, y float64) float64 {
+	r := math.Hypot(x, y) // distance from (0,0)
+	return math.Sin(r) / r
+}
+
+func average(nums ...float64) float64 {
+	var total, num float64
+	var i int
+
+	for i, num = range nums {
+		total += num
+	}
+
+	return total / float64(i+1)
+}
+
+func calculateColor(z float64) string {
 	// z has range of -0.22 - 0.99
 	const minColor = 0xff0000
 	const maxColor = 0x0000ff
@@ -70,15 +95,7 @@ func corner(i, j int) (float64, float64, string, bool) {
 
 	fmt.Fprintf(os.Stderr, "%v #%06x %s\n", bitColor, (colorR<<16)|colorB, hexColor)
 
-	// Project (x,y,z) isometrically onto 2-D SVG canvas (sx,sy).
-	sx := width/2 + (x-y)*cos30*xyscale
-	sy := height/2 + (x+y)*sin30*xyscale - z*zscale
-	return sx, sy, hexColor, true
-}
-
-func f(x, y float64) float64 {
-	r := math.Hypot(x, y) // distance from (0,0)
-	return math.Sin(r) / r
+	return hexColor
 }
 
 //!-
