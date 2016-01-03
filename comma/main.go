@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -39,12 +40,21 @@ func comma(s string) string {
 }
 
 func nonRecursiveComma(s string) string {
-	length := len(s)
-	if length <= 3 {
-		return s
+	var prefix byte
+	buf := bytes.Buffer{}
+
+	if strings.HasPrefix(s, "+") || strings.HasPrefix(s, "-") {
+		prefix = s[0]
+		s = s[1:]
 	}
 
-	buf := bytes.Buffer{}
+	length := len(s)
+
+	if length <= 3 {
+		return string(prefix) + s
+	}
+
+	buf.WriteByte(prefix)
 
 	for i := 0; i < length; i++ {
 		if (length-i)%3 == 0 {
