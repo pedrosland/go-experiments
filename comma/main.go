@@ -41,6 +41,7 @@ func comma(s string) string {
 
 func nonRecursiveComma(s string) string {
 	var prefix byte
+	var suffix string
 	buf := bytes.Buffer{}
 
 	if strings.HasPrefix(s, "+") || strings.HasPrefix(s, "-") {
@@ -48,20 +49,23 @@ func nonRecursiveComma(s string) string {
 		s = s[1:]
 	}
 
-	length := len(s)
-
-	if length <= 3 {
-		return string(prefix) + s
+	if index := strings.Index(s, "."); index >= 0 {
+		suffix = s[index:]
+		s = s[:index]
 	}
+
+	length := len(s)
 
 	buf.WriteByte(prefix)
 
 	for i := 0; i < length; i++ {
-		if (length-i)%3 == 0 {
+		if (length-i)%3 == 0 && i > 0 {
 			buf.WriteRune(',')
 		}
 		buf.WriteString(s[i : i+1])
 	}
+
+	buf.WriteString(suffix)
 
 	return buf.String()
 }
