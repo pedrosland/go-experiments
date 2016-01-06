@@ -32,6 +32,10 @@ func main() {
 	fmt.Println(s) // "[2 3 4 5 0 1]"
 	//!-slice
 
+	s = []int{0, 1, 2, 3, 4, 5}
+	s = rotate(s, 2)
+	fmt.Print(s)
+
 	// Interactive test of reverse.
 	input := bufio.NewScanner(os.Stdin)
 outer:
@@ -70,4 +74,15 @@ func reverseArr(a *[6]int) {
 	for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
 		a[i], a[j] = a[j], a[i]
 	}
+}
+
+func rotate(s []int, count int) []int {
+	numItems := len(s)
+	items := make([]int, numItems, numItems)
+	newPos := numItems - count
+
+	copy(items, s[count:])
+	copy(items[newPos:], s[:count])
+
+	return items
 }
