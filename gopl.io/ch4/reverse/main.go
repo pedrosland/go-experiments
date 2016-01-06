@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 func main() {
@@ -36,10 +37,18 @@ func main() {
 	s = rotate(s, 2)
 	fmt.Println(s)
 
-	str := []string{"a", "a", "b", "c", "c", "c"}
+	strS := []string{"a", "a", "b", "c", "c", "c"}
+	fmt.Println(strS)
+	strS = removeDuplicates(strS)
+	fmt.Println(strS)
+
+	str := "a b　c　　d"
 	fmt.Println(str)
-	str = removeDuplicates(str)
-	fmt.Println(str)
+	b := []byte(str)
+	fmt.Println(b)
+	b = replaceDuplicateSpaces(b)
+	fmt.Println(b)
+	fmt.Println(string(b))
 
 	// Interactive test of reverse.
 	input := bufio.NewScanner(os.Stdin)
@@ -107,4 +116,31 @@ func removeDuplicates(s []string) []string {
 	}
 
 	return s[:i]
+}
+
+func replaceDuplicateSpaces(b []byte) []byte {
+	// convert to []string so that `range` iterates over chars and not bytes
+	str := string(b)
+	lastCharSpace := false
+	i := 0
+
+	for _, char := range str {
+		if unicode.IsSpace(char) {
+			if !lastCharSpace {
+				b[i] = byte(' ') // ASCII space
+				lastCharSpace = true
+				i++
+			}
+			continue
+		} else if lastCharSpace {
+			lastCharSpace = false
+		}
+
+		charStr := string(char)
+		charLen := len(charStr)
+		copy(b[i:], charStr)
+		i += charLen
+	}
+
+	return b[:i]
 }
