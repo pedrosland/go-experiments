@@ -34,7 +34,12 @@ func main() {
 
 	s = []int{0, 1, 2, 3, 4, 5}
 	s = rotate(s, 2)
-	fmt.Print(s)
+	fmt.Println(s)
+
+	str := []string{"a", "a", "b", "c", "c", "c"}
+	fmt.Println(str)
+	str = removeDuplicates(str)
+	fmt.Println(str)
 
 	// Interactive test of reverse.
 	input := bufio.NewScanner(os.Stdin)
@@ -85,4 +90,21 @@ func rotate(s []int, count int) []int {
 	copy(items[newPos:], s[:count])
 
 	return items
+}
+
+// removeDuplicates removes adjacent duplicate strings in a slice
+// This modifies the original slices's array
+func removeDuplicates(s []string) []string {
+	var lastStr string
+	i := 0
+
+	for _, str := range s {
+		if str != lastStr {
+			s[i] = str
+			i++
+			lastStr = str
+		}
+	}
+
+	return s[:i]
 }
