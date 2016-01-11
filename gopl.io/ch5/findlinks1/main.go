@@ -20,8 +20,14 @@ func main() {
 		fmt.Fprintf(os.Stderr, "findlinks1: %v\n", err)
 		os.Exit(1)
 	}
-	for _, link := range visit(nil, doc) {
-		fmt.Println(link)
+
+	// for _, link := range visit(nil, doc) {
+	// 	fmt.Println(link)
+	// }
+
+	fmt.Println("Tag\tCount")
+	for tag, count := range countTags(make(map[string]int), doc) {
+		fmt.Printf("%s\t%d\n", tag, count)
 	}
 }
 
@@ -47,6 +53,21 @@ func visit(links []string, n *html.Node) []string {
 }
 
 //!-visit
+
+func countTags(tags map[string]int, n *html.Node) map[string]int {
+	if n.Type == html.ElementNode {
+		tags[n.Data]++
+	}
+
+	if n.FirstChild != nil {
+		countTags(tags, n.FirstChild)
+	}
+	if n.NextSibling != nil {
+		countTags(tags, n.NextSibling)
+	}
+
+	return tags
+}
 
 /*
 //!+html
