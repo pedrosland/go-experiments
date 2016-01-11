@@ -25,10 +25,12 @@ func main() {
 	// 	fmt.Println(link)
 	// }
 
-	fmt.Println("Tag\tCount")
-	for tag, count := range countTags(make(map[string]int), doc) {
-		fmt.Printf("%s\t%d\n", tag, count)
-	}
+	// fmt.Println("Tag\tCount")
+	// for tag, count := range countTags(make(map[string]int), doc) {
+	// 	fmt.Printf("%s\t%d\n", tag, count)
+	// }
+
+	printTextNodes(doc, "")
 }
 
 //!-main
@@ -67,6 +69,20 @@ func countTags(tags map[string]int, n *html.Node) map[string]int {
 	}
 
 	return tags
+}
+
+func printTextNodes(n *html.Node, tagName string) {
+	if n.Type == html.TextNode {
+		fmt.Printf("%s: %s\n", tagName, n.Data)
+		return
+	}
+
+	if n.FirstChild != nil && n.Data != "script" && n.Data != "style" {
+		printTextNodes(n.FirstChild, n.Data)
+	}
+	if n.NextSibling != nil {
+		printTextNodes(n.NextSibling, n.Data)
+	}
 }
 
 /*
