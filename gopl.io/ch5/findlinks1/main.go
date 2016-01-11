@@ -21,16 +21,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// for _, link := range visit(nil, doc) {
-	// 	fmt.Println(link)
-	// }
+	for _, link := range visit(nil, doc) {
+		fmt.Println(link)
+	}
 
 	// fmt.Println("Tag\tCount")
 	// for tag, count := range countTags(make(map[string]int), doc) {
 	// 	fmt.Printf("%s\t%d\n", tag, count)
 	// }
 
-	printTextNodes(doc, "")
+	// printTextNodes(doc, "")
 }
 
 //!-main
@@ -38,10 +38,37 @@ func main() {
 //!+visit
 // visit appends to links each link found in n and returns the result.
 func visit(links []string, n *html.Node) []string {
-	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				links = append(links, a.Val)
+	if n.Type == html.ElementNode {
+		if n.Data == "a" {
+			for _, a := range n.Attr {
+				if a.Key == "href" {
+					links = append(links, a.Val)
+				}
+			}
+		} else if n.Data == "link" {
+			isStylesheet := false
+			href := ""
+			for _, attr := range n.Attr {
+				if attr.Key == "rel" && attr.Val == "stylesheet" {
+					isStylesheet = true
+					if href != "" {
+						links = append(links, href)
+						break
+					}
+				} else if attr.Key == "href" {
+					if isStylesheet {
+						links = append(links, attr.Val)
+						break
+					} else {
+						href = attr.Val
+					}
+				}
+			}
+		} else if n.Data == "script" || n.Data == "img" {
+			for _, attr := range n.Attr {
+				if attr.Key == "src" {
+					links = append(links, attr.Val)
+				}
 			}
 		}
 	}
