@@ -9,6 +9,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -18,11 +19,11 @@ import (
 
 func main() {
 	for _, url := range os.Args[1:] {
-		outline(url)
+		outline(os.Stdout, url)
 	}
 }
 
-func outline(url string) error {
+func outline(w io.Writer, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -35,7 +36,7 @@ func outline(url string) error {
 	}
 
 	//!+call
-	forEachNode(doc, startElement, endElement)
+	forEachNode(w, doc, startElement, endElement)
 	//!-call
 
 	return nil
@@ -46,17 +47,17 @@ func outline(url string) error {
 // x in the tree rooted at n. Both functions are optional.
 // pre is called before the children are visited (preorder) and
 // post is called after (postorder).
-func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
+func forEachNode(w io.Writer, n *html.Node, pre, post func(w io.Writer, n *html.Node)) {
 	if pre != nil {
-		pre(n)
+		pre(w, n)
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		forEachNode(c, pre, post)
+		forEachNode(w, c, pre, post)
 	}
 
 	if post != nil {
-		post(n)
+		post(w, n)
 	}
 }
 
@@ -67,28 +68,28 @@ var depth int
 var inline bool
 
 // Note: this changes the meaning of the HTML by inserting spaces
-func startElement(n *html.Node) {
+func startElement(w io.Writer, n *html.Node) {
 	if n.Type == html.ElementNode {
 		if n.FirstChild == nil {
 			// Element has no children
-			fmt.Printf("%*s<%s%s/>\n", depth*2, "", n.Data, getAttrs(n))
+			fmt.Fprintf(w, "%*s<%s%s/>\n", depth*2, "", n.Data, getAttrs(n))
 			return
 		}
 
-		fmt.Printf("%*s<%s%s>\n", depth*2, "", n.Data, getAttrs(n))
+		fmt.Fprintf(w, "%*s<%s%s>\n", depth*2, "", n.Data, getAttrs(n))
 		depth++
 	} else if n.Type == html.CommentNode {
-		fmt.Printf("%*s<!--%s-->\n", depth*2, "", n.Data)
+		fmt.Fprintf(w, "%*s<!--%s-->\n", depth*2, "", n.Data)
 	} else if n.Type == html.TextNode {
 		text := strings.TrimSpace(n.Data)
 		if len(text) == 0 {
 			return
 		}
-		fmt.Printf("%*s%s\n", depth*2, "", text)
+		fmt.Fprintf(w, "%*s%s\n", depth*2, "", text)
 	}
 }
 
-func endElement(n *html.Node) {
+func endElement(w io.Writer, n *html.Node) {
 	if n.Type == html.ElementNode {
 		if n.FirstChild == nil {
 			// Element has no children - already printed self-closing tag above
@@ -96,7 +97,7 @@ func endElement(n *html.Node) {
 		}
 
 		depth--
-		fmt.Printf("%*s</%s>\n", depth*2, "", n.Data)
+		fmt.Fprintf(w, "%*s</%s>\n", depth*2, "", n.Data)
 	}
 }
 
